@@ -1,11 +1,12 @@
 package Repositories;
 
 import Config.PostgresDB;
-import Models.User;
+import Models.Patient;
 import Repositories.Interfaces.IPatientRepository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class PatientRepositoryImpl implements IPatientRepository {
@@ -16,16 +17,29 @@ public class PatientRepositoryImpl implements IPatientRepository {
     }
 
     @Override
-    public boolean addPatient(User patient) {
-        String query = "INSERT INTO patients (id, name) VALUES (?, ?)";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, patient.getId());  // Assuming patient ID is set after insertion into users table
-            statement.setString(2, patient.getName());  // Set patient's name
-            return statement.executeUpdate() > 0;
+    public void addPatient(Patient patient) {
+        String query = "INSERT INTO patients (name) VALUES (?) RETURNING id";
+        try (PreparedStatement statement = connection.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, patient.getName());
+
+            int affectedRows = statement.executeUpdate();
+
+
+            if (affectedRows > 0) {
+                try (ResultSet rs = statement.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        int generatedId = rs.getInt(1);
+                        patient.setId(generatedId);
+                        System.out.println("Patient registered with ID: " + generatedId);
+                    }
+                }
+            } else {
+                System.out.println("No rows affected, patient registration failed.");
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace();  // Handle SQL exception
         }
-        return false;
     }
+
 }
 

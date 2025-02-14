@@ -1,12 +1,14 @@
 package Models;
 
+import java.sql.Timestamp;
+
 public class Appointment {
     private int appointmentId;
     private int doctorId;
     private int patientId;
-    private String dateTime;
+    private Timestamp dateTime;
 
-    public Appointment(int appointmentId, int doctorId, int patientId, String dateTime) {
+    public Appointment(int appointmentId, int doctorId, int patientId, Timestamp dateTime) {
         this.appointmentId = appointmentId;
         this.doctorId = doctorId;
         this.patientId = patientId;
@@ -37,11 +39,11 @@ public class Appointment {
         this.patientId = patientId;
     }
 
-    public String getDateTime() {
+    public Timestamp getDateTime() {
         return dateTime;
     }
 
-    public void setDateTime(String dateTime) {
+    public void setDateTime(Timestamp dateTime) {
         this.dateTime = dateTime;
     }
 }

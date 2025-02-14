@@ -4,6 +4,10 @@ import Models.*;
 import Repositories.Interfaces.*;
 import Exceptions.AppointmentConflictException;
 import Exceptions.UserNotFoundException;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -23,59 +27,45 @@ public class PatientService {
         this.patientRepository = patientRepository;
     }
 
-    // ------------------------ APPOINTMENTS ------------------------
 
     public boolean bookAppointment(int doctorId, int patientId, String dateTime) {
-        // Check if patient exists
-        User patient = userRepository.getUserById(patientId);
-        if (patient == null) {
-            throw new UserNotFoundException("Patient with ID " + patientId + " not found.");
+        Timestamp timestamp = null;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            Date parsedDate = sdf.parse(dateTime);
+            timestamp = new Timestamp(parsedDate.getTime());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Invalid date-time format.");
         }
 
-        // Check if doctor exists
-        User doctor = userRepository.getUserById(doctorId);
-        if (doctor == null) {
-            throw new UserNotFoundException("Doctor with ID " + doctorId + " not found.");
-        }
+        Appointment appointment = new Appointment(0, doctorId, patientId, timestamp);
 
-        // Check if there's a conflict using `checkAppointmentConflict()`
-        if (appointmentRepository.checkAppointmentConflict(doctorId, dateTime)) {
-            throw new AppointmentConflictException("Doctor is already booked at this time.");
-        }
+        return appointmentRepository.createAppointment(appointment);
+    }
 
-        // Create the appointment
-        Appointment appointment = new Appointment(0, doctorId, patientId, dateTime);
-        boolean success = appointmentRepository.createAppointment(appointment);
 
-        // Logging action
-        if (success) {
-            logger.info("Patient " + patientId + " booked an appointment with Doctor " + doctorId + " at " + dateTime);
+
+    public void createPatient(Patient patient) {
+
+        patientRepository.addPatient(patient);
+
+
+        if (patient.getId() > 0) {
+            System.out.println("Patient registered with ID: " + patient.getId());
         } else {
-            logger.warning("Failed to book appointment for Patient " + patientId);
+            throw new IllegalStateException("Failed to register patient.");
         }
-
-        return success;
     }
 
-    public boolean createPatient(String name, String email, String password) {
-        // Create the user (Patient)
-        User patient = new Patient(0, name, email, password);
 
-        // Save the user to the users table
-        boolean userCreated = userRepository.createUser(patient);
 
-        if (userCreated) {
-            // Insert into the patients table
-            return patientRepository.addPatient(patient);
-        }
-        return false;
-    }
 
     public List<Appointment> viewAppointments(int patientId) {
         return appointmentRepository.getAppointmentsByPatientId(patientId);
     }
 
-    // ------------------------ MEDICINE REPORTS ------------------------
+
 
     public List<MedicineReport> viewMedicineReports(int patientId) {
         return medicineReportRepository.getReportsByPatientId(patientId);

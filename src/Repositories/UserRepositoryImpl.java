@@ -28,7 +28,7 @@ public class UserRepositoryImpl implements IUserRepository {
                         rs.getString("name"),
                         rs.getString("email"),
                         rs.getString("password"),
-                        UserRole.valueOf(rs.getString("role").toUpperCase()) // Convert to Enum
+                        UserRole.valueOf(rs.getString("role").toUpperCase())
                 );
             }
         } catch (SQLException e) {
@@ -50,7 +50,7 @@ public class UserRepositoryImpl implements IUserRepository {
                         rs.getString("name"),
                         rs.getString("email"),
                         rs.getString("password"),
-                        UserRole.valueOf(rs.getString("role").toUpperCase()) // Convert to Enum
+                        UserRole.valueOf(rs.getString("role").toUpperCase())
                 );
             }
         } catch (SQLException e) {
@@ -88,14 +88,18 @@ public class UserRepositoryImpl implements IUserRepository {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, user.getName());
             statement.setString(2, user.getEmail());
-            statement.setString(3, user.getPassword()); // Plaintext password
-            statement.setString(4, user.getRole().name()); // Enum to String
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                // Set the generated user ID
-                user.setId(rs.getInt("id"));
+            statement.setString(3, user.getPassword());
+            statement.setString(4, user.getRole().name());
+            int affectedRows = statement.executeUpdate();
+
+            if (affectedRows > 0) {
+
+                ResultSet generatedKeys = statement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    user.setId(generatedKeys.getInt(1));
+                }
+                return true;
             }
-            return rs.getRow() > 0;
         } catch (SQLException e) {
             System.err.println("Error creating user: " + e.getMessage());
         }

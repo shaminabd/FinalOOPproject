@@ -45,10 +45,11 @@ public class AdminController implements UserController {
             System.out.println("2. Create Hospital");
             System.out.println("3. Delete Hospital");
             System.out.println("4. View Doctors");
-            System.out.println("5. View Patients");
-            System.out.println("6. Manage Medicines");
-            System.out.println("7. View Appointments");
-            System.out.println("8. Logout");
+            System.out.println("5. View Surgeons");
+            System.out.println("6. View Patients");
+            System.out.println("7. Manage Medicines");
+            System.out.println("8. View Appointments");
+            System.out.println("9. Logout");
             printLine();
             System.out.print("Enter your choice: ");
 
@@ -60,10 +61,11 @@ public class AdminController implements UserController {
                 case 2 -> createHospital();
                 case 3 -> deleteHospital();
                 case 4 -> viewDoctors();
-                case 5 -> viewPatients();
-                case 6 -> manageMedicines();
-                case 7 -> viewAppointments();
-                case 8 -> logout();
+                case 5 -> viewSurgeons();
+                case 6 -> viewPatients();
+                case 7 -> manageMedicines();
+                case 8 -> viewAppointments();
+                case 9 -> logout();
                 default -> printError("Invalid choice. Try again.");
             }
         }
@@ -113,6 +115,16 @@ public class AdminController implements UserController {
         printHeader("MANAGE MEDICINES");
         List<Medicine> medicines = adminService.viewMedicines();
         medicines.forEach(m -> System.out.println(m.getId() + " - " + m.getName() + " (" + m.getQuantity() + ")"));
+    }
+
+    private void viewSurgeons() {
+        printHeader("SURGEONS LIST");
+
+        // Get the list of Surgeons
+        List<Surgeon> surgeons = adminService.getSurgeons();
+
+        // Print the details of each Surgeon
+        surgeons.forEach(surgeon -> System.out.println(surgeon.getId() + " - " + surgeon.getName() + " - Specialization: " + surgeon.getSpecialization()));
     }
 
     private void viewAppointments() {

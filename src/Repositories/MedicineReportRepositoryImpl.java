@@ -85,7 +85,6 @@ public class MedicineReportRepositoryImpl implements IMedicineReportRepository {
         return reports;
     }
 
-    // 🔹 NEW: Fetch All Reports (For Admin)
     @Override
     public List<MedicineReport> getAllReports() {
         List<MedicineReport> reports = new ArrayList<>();
@@ -109,7 +108,6 @@ public class MedicineReportRepositoryImpl implements IMedicineReportRepository {
         return reports;
     }
 
-    // 🔹 NEW: Update Medicine Report
     @Override
     public boolean updateReport(int reportId, MedicineReport updatedReport) {
         try {
@@ -130,7 +128,6 @@ public class MedicineReportRepositoryImpl implements IMedicineReportRepository {
         return false;
     }
 
-    // 🔹 NEW: Delete Medicine Report
     @Override
     public boolean deleteReport(int reportId) {
         try {

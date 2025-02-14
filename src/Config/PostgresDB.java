@@ -6,14 +6,16 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class PostgresDB implements IDB {
-    private static PostgresDB instance;
+    private static volatile PostgresDB instance;  // volatile ensures visibility in multi-threaded environments
     private static Connection connection;
     private static final String URL = "jdbc:postgresql://localhost:5432/hospital_demo_db";
     private static final String USER = "postgres";
     private static final String PASSWORD = "user";
 
+    // Private constructor prevents instantiation from other classes
     private PostgresDB() {
         try {
+            // Register the PostgreSQL JDBC driver
             Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
             System.out.println("✅ Connected to the database successfully!");
@@ -24,13 +26,20 @@ public class PostgresDB implements IDB {
         }
     }
 
+    // Public method to provide access to the single instance of the class
     public static PostgresDB getInstance() {
+        // Double-checked locking to ensure thread-safety and lazy initialization
         if (instance == null) {
-            instance = new PostgresDB();
+            synchronized (PostgresDB.class) {
+                if (instance == null) {
+                    instance = new PostgresDB();
+                }
+            }
         }
         return instance;
     }
 
+    // Method to connect to the database (returns existing connection if already established)
     @Override
     public Connection connect() {
         try {
@@ -44,6 +53,7 @@ public class PostgresDB implements IDB {
         return connection;
     }
 
+    // Method to close the database connection
     @Override
     public void close() {
         try {

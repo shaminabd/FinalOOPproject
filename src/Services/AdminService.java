@@ -25,7 +25,7 @@ public class AdminService {
         this.medicineReportRepository = medicineReportRepository;
     }
 
-    // ------------------------ HOSPITAL MANAGEMENT ------------------------
+
 
     public boolean createHospital(String hospitalName) {
         return hospitalRepository.createHospital(new Hospital(0, hospitalName));
@@ -43,7 +43,6 @@ public class AdminService {
         return hospitalRepository.getAllHospitals();
     }
 
-    // ------------------------ USER MANAGEMENT ------------------------
 
     public List<User> viewAllUsers() {
         return userRepository.getAllUsers();
@@ -69,7 +68,7 @@ public class AdminService {
                 .collect(Collectors.toList());
     }
 
-    // ------------------------ MEDICINE MANAGEMENT ------------------------
+
 
     public boolean addMedicine(String name, int quantity) {
         Medicine existingMedicine = medicineRepository.getMedicineByName(name);
@@ -91,7 +90,7 @@ public class AdminService {
         return medicineRepository.getAllMedicines();
     }
 
-    // ------------------------ APPOINTMENT MANAGEMENT ------------------------
+
 
     public List<Appointment> viewAppointments() {
         return appointmentRepository.getAllAppointments(); // Fetch all appointments
@@ -109,7 +108,7 @@ public class AdminService {
         return appointmentRepository.deleteAppointment(appointmentId);
     }
 
-    // ------------------------ MEDICINE REPORTS MANAGEMENT ------------------------
+
 
     public List<MedicineReport> viewMedicineReports() {
         return medicineReportRepository.getAllReports(); // Fetch all reports
@@ -122,4 +121,15 @@ public class AdminService {
     public List<MedicineReport> viewMedicineReportsByPatient(int patientId) {
         return medicineReportRepository.getReportsByPatientId(patientId);
     }
+
+    // In AdminService class
+
+    public List<Surgeon> getSurgeons() {
+        List<User> allDoctors = userRepository.getAllUsers();
+        return allDoctors.stream()
+                .filter(user -> user instanceof Surgeon)  // Only include Surgeons
+                .map(user -> (Surgeon) user)  // Cast to Surgeon
+                .collect(Collectors.toList());  // Collect into a list
+    }
+
 }

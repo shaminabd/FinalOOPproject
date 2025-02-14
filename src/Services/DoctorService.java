@@ -10,6 +10,8 @@
     import java.util.List;
     import java.util.stream.Collectors;
 
+    import static Enums.Specialization.PSYCHOLOGIST;
+
     public class DoctorService {
         private final IAppointmentRepository appointmentRepository;
         private final IMedicineRepository medicineRepository;
@@ -29,7 +31,6 @@
             this.doctorRepository = doctorRepository;
         }
 
-        // ------------------------ VIEWING DATA ------------------------
 
 
 
@@ -45,13 +46,14 @@
             return hospitalRepository.getAllHospitals();
         }
 
-        public boolean createDoctor(Doctor doctor) {
-            // Call the repository method to insert the doctor into the doctors table
-            return doctorRepository.addDoctor(doctor);
+        public void createDoctor(Doctor doctor) {
+
+            doctorRepository.addDoctor(doctor);
         }
 
-
-
+        public List<Doctor> getDoctorsWithHospitalName() {
+            return doctorRepository.getDoctorsWithHospitalName();  // Call to repository method
+        }
 
         public List<User> viewPatients() {
             return userRepository.getAllUsers().stream()
@@ -71,35 +73,39 @@
             return medicineReportRepository.getReportsByDoctorId(doctorId);
         }
 
-        // ------------------------ PRESCRIBING MEDICINE ------------------------
 
         public boolean prescribeMedicine(int doctorId, int patientId, int medicineId, int quantity, String recommendation) {
             User doctor = userRepository.getUserById(doctorId);
 
-            // Ensure the user is a Doctor and not a Psychologist
-            if (!(doctor instanceof Doctor doctorObj)) {
+
+            if (!(UserRole.DOCTOR.equals(doctor.getRole()))) {
                 throw new UnauthorizedAccessException("Only doctors can prescribe medicine.");
             }
-            if (doctorObj.getRole() == UserRole.PSYCHOLOGIST) {
-                throw new UnauthorizedAccessException("Psychologists cannot prescribe medicine.");
+
+
+            if (doctor instanceof Doctor) {
+                Doctor doctorObj = (Doctor) doctor;
+                if (doctorObj.getSpecialization().equals(PSYCHOLOGIST)) {
+                    throw new UnauthorizedAccessException("Psychologists cannot prescribe medicine.");
+                }
             }
 
-            // Retrieve medicine and check availability
+
             Medicine medicine = medicineRepository.getMedicineById(medicineId);
             if (medicine == null) {
                 throw new MedicineStockException("Invalid medicine ID: " + medicineId);
             }
 
-            // Validate prescription quantity and stock
+
             DataValidation.validateMedicineQuantity(quantity, medicine.getQuantity());
             if (quantity > 5) {
                 throw new MedicineStockException("Cannot prescribe more than 5 units at a time.");
             }
 
-            // Reduce stock and create a medicine report
             medicineRepository.updateStock(medicineId, medicine.getQuantity() - quantity);
             MedicineReport report = new MedicineReport(0, doctorId, patientId, medicineId, medicine.getName(), quantity, recommendation);
 
             return medicineReportRepository.createReport(report);
         }
     }
+

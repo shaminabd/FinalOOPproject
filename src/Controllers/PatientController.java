@@ -3,6 +3,7 @@ package Controllers;
 import Controllers.Interfaces.UserController;
 import Models.*;
 import Enums.UserRole;
+import Services.AdminService;
 import Services.UserService;
 import Services.PatientService;
 import java.util.List;
@@ -11,13 +12,15 @@ import java.util.Scanner;
 public class PatientController implements UserController {
     private final UserService userService;
     private final PatientService patientService;
+    private final AdminService adminService;
     private final Scanner scanner = new Scanner(System.in);
     private int patientId;
     private boolean isLoggedIn = false;
 
-    public PatientController(UserService userService, PatientService patientService) {
+    public PatientController(UserService userService, PatientService patientService, AdminService adminService) {
         this.userService = userService;
         this.patientService = patientService;
+        this.adminService = adminService;
         this.isLoggedIn = false;
     }
 
@@ -39,8 +42,9 @@ public class PatientController implements UserController {
         System.out.print("Enter Password: ");
         String password = scanner.nextLine();
 
-        User newUser = new Patient(0, name, email, password);
+        Patient newUser = new Patient(0, name, email, password);
         if (userService.registerUser(newUser)) {
+            patientService.createPatient(newUser);
             printSuccess("Patient registered successfully.");
         } else {
             printError("Registration failed. Email might already exist.");
@@ -77,18 +81,26 @@ public class PatientController implements UserController {
     }
 
     private void bookAppointment() {
+        System.out.println("Your Patient ID: " + patientId);
+        System.out.print("Enter Patient ID: ");
+        int patientId = scanner.nextInt();
+        scanner.nextLine();
+        List<User> doctors = adminService.viewDoctors();
+        doctors.forEach(d -> System.out.println(d.getId() + " - " + d.getName()));
         System.out.print("Enter Doctor ID: ");
         int doctorId = scanner.nextInt();
         scanner.nextLine();
         System.out.print("Enter Date & Time (YYYY-MM-DD HH:MM): ");
         String dateTime = scanner.nextLine();
 
+        // Book the appointment and pass patientId and doctorId
         if (patientService.bookAppointment(doctorId, patientId, dateTime)) {
             printSuccess("Appointment booked successfully.");
         } else {
             printError("Failed to book appointment.");
         }
     }
+
 
     private void viewAppointments() {
         printHeader("YOUR APPOINTMENTS");

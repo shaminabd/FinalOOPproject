@@ -4,6 +4,7 @@ import Controllers.Interfaces.UserController;
 import Enums.Specialization;
 import Models.*;
 import Enums.UserRole;
+import Services.AdminService;
 import Services.UserService;
 import Services.DoctorService;
 import java.util.List;
@@ -12,13 +13,15 @@ import java.util.Scanner;
 public class DoctorController implements UserController {
     private final UserService userService;
     private final DoctorService doctorService;
+    private final AdminService adminService;
     private final Scanner scanner = new Scanner(System.in);
     private int doctorId;
     private boolean isLoggedIn = false;
 
-    public DoctorController(UserService userService, DoctorService doctorService) {
+    public DoctorController(UserService userService, DoctorService doctorService, AdminService adminService) {
         this.userService = userService;
         this.doctorService = doctorService;
+        this.adminService = adminService;
         this.isLoggedIn = false;
     }
     public void start(User user) {
@@ -69,16 +72,10 @@ public class DoctorController implements UserController {
 
         Doctor doctor = new Doctor(0, name, email, password, hospitalId, UserRole.DOCTOR, specialization);
         if (userService.registerUser(doctor)) {
-            int doctorId = doctor.getId();
 
+            doctorService.createDoctor(doctor);
             // Once the user is created, insert the doctor into the doctors table
-            boolean isRegistered = doctorService.createDoctor(doctor);
 
-            if (isRegistered) {
-                printSuccess("Doctor registered successfully in both users and doctors table.");
-            } else {
-                printError("Doctor registration failed in doctors table.");
-            }
         } else {
             printError("Doctor registration failed.");
         }
@@ -128,8 +125,12 @@ public class DoctorController implements UserController {
     }
 
     private void prescribeMedicine() {
+        List<User> patients = adminService.viewPatients();
+        patients.forEach(p -> System.out.println(p.getId() + " - " + p.getName()));
         System.out.print("Enter Patient ID: ");
         int patientId = scanner.nextInt();
+        List<Medicine> medicines = adminService.viewMedicines();
+        medicines.forEach(m -> System.out.println(m.getId() + " - " + m.getName() + " (" + m.getQuantity() + ")"));
         System.out.print("Enter Medicine ID: ");
         int medicineId = scanner.nextInt();
         System.out.print("Enter Quantity: ");

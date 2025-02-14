@@ -25,8 +25,8 @@ public class Main {
         PatientService patientService = new PatientService(appointmentRepository, medicineReportRepository, userRepository, patientRepository);
 
         AdminController adminController = new AdminController(userService, adminService);
-        DoctorController doctorController = new DoctorController(userService, doctorService);
-        PatientController patientController = new PatientController(userService, patientService);
+        DoctorController doctorController = new DoctorController(userService, doctorService, adminService);
+        PatientController patientController = new PatientController(userService, patientService, adminService);
 
 
         MyApplication app = new MyApplication(userService,adminController, doctorController, patientController);
