@@ -122,7 +122,7 @@ public class AdminService {
         return medicineReportRepository.getReportsByPatientId(patientId);
     }
 
-    // In AdminService class
+
 
     public List<Surgeon> getSurgeons() {
         List<User> allDoctors = userRepository.getAllUsers();

@@ -26,6 +26,6 @@ public class Doctor extends User {
     }
 
     public Specialization getSpecialization() {
-        return this.specialization;  // Return the specialization of the doctor
+        return this.specialization;
     }
 }
